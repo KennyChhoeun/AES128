@@ -1,18 +1,17 @@
-#include "aes128.h"
+#include "AES128.h"
 #include <iostream>
 #include <fstream>
 using namespace std;
 
 void HexOutput(unsigned char c){
-    if(c / 16 < 10)
-        cout << (char)((x/16) + '0');
-    if(c / 16 >= 10)
-        cout << (char)(((x/16)-10)+'A');
-    if(c % 16 < 10)
-        cout<<(char)((x%16)+'0');
-    if(c % 16 ?= 10)
-        cout<<(char)(((x%16)-10)+'A');
-    
+    if(c/16 < 10)
+        cout << (char)((c/16) + '0');
+    if(c/16 >= 10)
+        cout << (char)(((c/16)-10)+'A');
+    if(c%16 < 10)
+        cout<<(char)((c%16)+'0');
+    if(c%16 >= 10)
+        cout<<(char)(((c%16)-10)+'A');
 }
 void KeyExpansionCore(unsigned char* in, unsigned char i) {
 	//rotate left 1 byte
@@ -173,7 +172,8 @@ void AES128Encrypt(unsigned char* m, unsigned char* key) {
 int main(int argc, char* argv[])
 {
     fstream inputfile;
-    fsteam outputfile;
+    fstream outputfile;
+    string inputFileName;
 	unsigned char m[] = "This is a message we will encrypt with AES!";
 	unsigned char key[16] = {1,2,3,4,5,6,7,8,
 							9,10,11,12,13,14,15,16};
@@ -208,7 +208,9 @@ int main(int argc, char* argv[])
 	}
 
 	for (int i = 0; i < paddedmsgLength; i++) {
-		cout << hex << paddedMsg[i] << " ";
+        //cout << hex << paddedMsg[i] << " "<< endl;
+        HexOutput(paddedMsg[i]);
+        cout<<" ";
 	}
 
 	return 0;
