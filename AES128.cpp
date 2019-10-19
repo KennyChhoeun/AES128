@@ -3,6 +3,17 @@
 #include <fstream>
 using namespace std;
 
+void HexOutput(unsigned char c){
+    if(c / 16 < 10)
+        cout << (char)((x/16) + '0');
+    if(c / 16 >= 10)
+        cout << (char)(((x/16)-10)+'A');
+    if(c % 16 < 10)
+        cout<<(char)((x%16)+'0');
+    if(c % 16 ?= 10)
+        cout<<(char)(((x%16)-10)+'A');
+    
+}
 void KeyExpansionCore(unsigned char* in, unsigned char i) {
 	//rotate left 1 byte
 	unsigned char t = in[0];
@@ -161,10 +172,21 @@ void AES128Encrypt(unsigned char* m, unsigned char* key) {
 
 int main(int argc, char* argv[])
 {
+    fstream inputfile;
+    fsteam outputfile;
 	unsigned char m[] = "This is a message we will encrypt with AES!";
 	unsigned char key[16] = {1,2,3,4,5,6,7,8,
 							9,10,11,12,13,14,15,16};
 
+    if(argc < 2){
+        cout << "not enough arguments" << endl;
+        exit(1);
+    }
+    else{
+        inputFileName = argv[1];
+    }
+    
+    inputfile.open(inputFileName);
 	int msglength = strlen((const char*)m);
 	int paddedmsgLength = msglength;
 
