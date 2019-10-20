@@ -1,6 +1,10 @@
 #include "AES128.h"
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <cstring>
+#include <string>
+
 using namespace std;
 
 void HexOutput(unsigned char c){
@@ -9,10 +13,18 @@ void HexOutput(unsigned char c){
     if(c/16 >= 10)
         cout << (char)(((c/16)-10)+'A');
     if(c%16 < 10)
-        cout<<(char)((c%16)+'0');
+        cout << (char)((c%16)+'0');
     if(c%16 >= 10)
-        cout<<(char)(((c%16)-10)+'A');
+        cout << (char)(((c%16)-10)+'A');
 }
+
+void encExtension(string& s, const string& newExt){
+    string::size_type i = s.rfind('.',s.length());
+    if(i!=string::npos) {
+        s.replace(i+1, newExt.length(), newExt);
+    }
+}
+
 void KeyExpansionCore(unsigned char* in, unsigned char i) {
 	//rotate left 1 byte
 	unsigned char t = in[0];
@@ -63,7 +75,6 @@ void KeyExp(unsigned char* inputKey, unsigned char* expKey){
 		}
 	}
 }
-
 
 void shift_rows(unsigned char* state) {
 	unsigned char tmp[16];
@@ -131,15 +142,12 @@ void keyAdd(unsigned char* state, unsigned char* roundKey) {
 	}
 }
 
-
 void sub_bytes(unsigned char* state) {
 	for (int i = 0; i < 16; i++) {
 		state[i] = sbox[state[i]];
 	}
 }
-
-
-
+//was unsigned char* key) for line 148
 void AES128Encrypt(unsigned char* m, unsigned char* key) {
 	unsigned char state[16]; 
 	for (int i = 0; i < 16; i++) {
@@ -171,22 +179,49 @@ void AES128Encrypt(unsigned char* m, unsigned char* key) {
 
 int main(int argc, char* argv[])
 {
-    fstream inputfile;
-    fstream outputfile;
+    ifstream src_filepath;
+    ofstream dst_filepath;
+    
     string inputFileName;
 	unsigned char m[] = "This is a message we will encrypt with AES!";
-	unsigned char key[16] = {1,2,3,4,5,6,7,8,
-							9,10,11,12,13,14,15,16};
-
-    if(argc < 2){
-        cout << "not enough arguments" << endl;
+    if (argc < 2) {
+        cout << "Not Enough Arguments given, format is " << endl;
+        cout << "./AES128Encrypt <file_to_be_encrypted.txt>" << endl;
         exit(1);
     }
-    else{
-        inputFileName = argv[1];
-    }
+    inputFileName = argv[1];
+    // integers for the key to be inputed by user in hex
+    //int a,b,c,d,e,f,g,h,i,j,k,l,n,o,p,q;
+    //int z;
+    cout << "input a set of hex number real quick bro: ";
+    /*cin >> hex >> a >> hex >> b >> hex >> c >> hex >> d >> hex >> e >> hex >> f >> hex >> g >> hex >> h
+    >> hex >> i >> hex >> j >> hex >> k >> hex >> l >> hex >> n >> hex >> o >> hex >> p >> hex >> q;*/
     
-    inputfile.open(inputFileName);
+    /*cout << "your hex in decimal " << a << " " << b << " " << c << " " << d  << " " << e << " " << f << " " << g << " " <<
+    h << " " << i << " " << j << " " << k << " " << l << " " << n << " " << o << " " << p << " " << q << " ";*/
+    /*unsigned char key[16] = {1,2,3,4,5,6,7,8,
+        9,10,11,12,13,14,15,16};*/
+
+    string keyInput;
+    getline(cin,keyInput);
+    
+    istringstream hex_chars_stream(keyInput);
+    unsigned char key[16];
+    int i=0;
+    unsigned int c;
+    while(hex_chars_stream >> hex >> c)
+    {
+        key[i] = c;
+        i++;
+    }
+    for (int j=0;j<16;j++){
+        cout << key[j] << " ";
+    }
+    encExtension(inputFileName, "enc");
+    dst_filepath.open(inputFileName);
+    //will create a output file with same name
+    //with but with .enc extension
+    
 	int msglength = strlen((const char*)m);
 	int paddedmsgLength = msglength;
 
@@ -204,14 +239,15 @@ int main(int argc, char* argv[])
 
 	//encrypt padded msg by pasing blocks of 16 bytes to AES128Encrypt()
 	for (int i = 0; i < paddedmsgLength; i+=16) {
-		AES128Encrypt(paddedMsg + i, key);
+		AES128Encrypt(paddedMsg+i, key);
 	}
 
 	for (int i = 0; i < paddedmsgLength; i++) {
-        //cout << hex << paddedMsg[i] << " "<< endl;
+        //cout << hex << paddedMsg[i] << " ";
         HexOutput(paddedMsg[i]);
         cout<<" ";
 	}
 
+    cout << "\nEncryption complete" << endl;
 	return 0;
 }
