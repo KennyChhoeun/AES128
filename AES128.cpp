@@ -4,7 +4,9 @@
 #include <sstream>
 #include <cstring>
 #include <string>
-
+#include <termios.h>
+#include <unistd.h>
+#include <vector>
 using namespace std;
 
 void HexOutput(unsigned char c){
@@ -177,30 +179,40 @@ void AES128Encrypt(unsigned char* m, unsigned char* key) {
 
 }
 
+
+char* readFileBytes(const char *name)
+{
+    ifstream fl(name);
+    fl.seekg( 0, ios::end );
+    size_t len = fl.tellg();
+    char *ret = new char[len];
+    fl.seekg(0, ios::beg);
+    fl.read(ret, len);
+    fl.close();
+    return ret;
+}
+
+
 int main(int argc, char* argv[])
 {
     ifstream src_filepath;
     ofstream dst_filepath;
     
     string inputFileName;
-	unsigned char m[] = "This is a message we will encrypt with AES!";
+	unsigned char m[] = "qwertyuiopasdfgh";
+    
     if (argc < 2) {
         cout << "Not Enough Arguments given, format is " << endl;
         cout << "./AES128Encrypt <file_to_be_encrypted.txt>" << endl;
         exit(1);
     }
     inputFileName = argv[1];
-    // integers for the key to be inputed by user in hex
-    //int a,b,c,d,e,f,g,h,i,j,k,l,n,o,p,q;
-    //int z;
-    cout << "input a set of hex number real quick bro: ";
-    /*cin >> hex >> a >> hex >> b >> hex >> c >> hex >> d >> hex >> e >> hex >> f >> hex >> g >> hex >> h
-    >> hex >> i >> hex >> j >> hex >> k >> hex >> l >> hex >> n >> hex >> o >> hex >> p >> hex >> q;*/
     
-    /*cout << "your hex in decimal " << a << " " << b << " " << c << " " << d  << " " << e << " " << f << " " << g << " " <<
-    h << " " << i << " " << j << " " << k << " " << l << " " << n << " " << o << " " << p << " " << q << " ";*/
-    /*unsigned char key[16] = {1,2,3,4,5,6,7,8,
-        9,10,11,12,13,14,15,16};*/
+    //read the input file binary here ***
+    ifstream in(inputFileName, ios::binary);
+    
+    cout << "Please input the encryption key in hex values seperated by spaces\n";
+    cout << "eg. 01 02 03 04 05 06 07 07 09 0a 0b 0c 0d 0e 0f 10: \n";
 
     string keyInput;
     getline(cin,keyInput);
@@ -214,11 +226,9 @@ int main(int argc, char* argv[])
         key[i] = c;
         i++;
     }
-    for (int j=0;j<16;j++){
-        cout << key[j] << " ";
-    }
+    
     encExtension(inputFileName, "enc");
-    dst_filepath.open(inputFileName);
+    //dst_filepath.open(inputFileName);
     //will create a output file with same name
     //with but with .enc extension
     
@@ -243,11 +253,27 @@ int main(int argc, char* argv[])
 	}
 
 	for (int i = 0; i < paddedmsgLength; i++) {
-        //cout << hex << paddedMsg[i] << " ";
         HexOutput(paddedMsg[i]);
-        cout<<" ";
+        cout << " ";
 	}
-
-    cout << "\nEncryption complete" << endl;
+    
+    dst_filepath.open(inputFileName, ios::out | ios::binary);
+    if (dst_filepath.is_open())
+    {
+        for(int i=0;i<paddedmsgLength;i++){
+            dst_filepath << paddedMsg[i];
+        }
+        dst_filepath.close();
+        cout << "Wrote encrypted message to: " << inputFileName <<  endl;
+    }
+    else
+        cout << "Unable to open file";
+    
+    // Free memory //
+    delete[] paddedMsg;
+    
+    return 0;
+    
+    cout << "\nEncryption Complete √" << endl;
 	return 0;
 }
