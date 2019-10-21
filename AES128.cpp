@@ -1,3 +1,8 @@
+/*author: Kenny Chhoeun
+ CS 4600: Cryptography and Information Security
+ Prof. Atanasio
+ Project: AES128 Encryption Implementation
+*/
 #include "AES128.h"
 #include <iostream>
 #include <fstream>
@@ -8,14 +13,15 @@
 #include <unistd.h>
 using namespace std;
 
-// I believe these methods of hiding keystrokes
+// Doing research, I believe these methods of hiding keystrokes
 // are operating system specific
 // so they more than likely will not work on a windows
-//based machine, only _nux machines
+// based machine, only _nux machines which is what I happen to be running
 void hide_Keystrokes()
 {
     //part of termois.h
     termios tty;
+    //uses unistd.h
     tcgetattr(STDIN_FILENO, &tty);
     //disabling echo and keystroke
     tty.c_lflag &= ~ECHO;
@@ -26,6 +32,7 @@ void show_Keystrokes()
 {
     //part of termois.h
     termios tty;
+    //uses unistd.h
     tcgetattr(STDIN_FILENO, &tty);
     //enable echo back so terminal works normally
     tty.c_lflag |= ECHO;
